@@ -49,7 +49,7 @@ class ApiModel extends Model
                 LEFT JOIN (
                     SELECT * FROM t_product_img WHERE type=1
                 ) AS t4
-                ON t3.id = t4.id
+                ON t3.id = t4.product_id
             ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute();
@@ -72,6 +72,54 @@ class ApiModel extends Model
              ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$param['product_id']]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public function productImageInsert(&$param)
+    {
+        $sql =
+            "   INSERT INTO t_product_img
+                SET product_id = :product_id
+                    , type = :type
+                    , path = :path
+            ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":product_id", $param["product_id"]);
+        $stmt->bindValue(":type", $param["type"]);
+        $stmt->bindValue(":path", $param["path"]); //파일명.확장자 만 저장
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+    public function productImageList(&$param)
+    {
+        $sql = "SELECT * FROM t_product_img 
+                WHERE product_id = :product_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":product_id", $param["product_id"]);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public function productImageDelete(&$param)
+    {
+        $sql =
+            "   DELETE FROM t_product_img WHERE id=:product_image_id
+            ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":product_image_id", $param["product_image_id"]);
+        $stmt->execute();
+        return $stmt->rowCount();
+    }
+
+    public function SearchImagePath(&$param)
+    {
+        $sql =
+            "  SELECT * FROM t_product_img
+            WHERE id=:product_image_id
+         ";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(":product_image_id", $param["product_image_id"]);
+        $stmt->execute();
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 }
